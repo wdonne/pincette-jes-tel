@@ -98,6 +98,28 @@ public class OtelUtil {
         .put(PROCESS_RUNTIME_VERSION, getProperty("java.runtime.version"));
   }
 
+  /**
+   * Creates observable <code>Long</code> counters.
+   *
+   * @param meter the meter from which the counters are created.
+   * @param name the observableCounter name.
+   * @param attributes the function that generates the attributes for each measurement based on the
+   *     counted data.
+   * @param increment the amount to be added to the observableCounter for an incoming element.
+   * @param counters a set where the generated counters are put. At some point the caller should
+   *     close all the counters.
+   * @return The function that captures the counted data.
+   * @param <T> the value type.
+   */
+  public static <T> Consumer<T> counter(
+      final Meter meter,
+      final String name,
+      final Function<T, Attributes> attributes,
+      final ToLongFunction<T> increment,
+      final Set<AutoCloseable> counters) {
+    return observableCounter(meter, name, attributes, increment, counters, false);
+  }
+
   private static boolean hasOtelHandler(final Logger logger) {
     return ofNullable(logger.getHandlers()).stream()
         .flatMap(Arrays::stream)
@@ -172,6 +194,38 @@ public class OtelUtil {
         .map(p -> OpenTelemetrySdk.builder().setMeterProvider(p).build());
   }
 
+  private static <T> Consumer<T> observableCounter(
+      final Meter meter,
+      final String name,
+      final Function<T, Attributes> attributes,
+      final ToLongFunction<T> increment,
+      final Set<AutoCloseable> counters,
+      final boolean reset) {
+    final Map<Attributes, Long> counts = new ConcurrentHashMap<>();
+    final Set<Attributes> created = new HashSet<>();
+
+    return message -> {
+      final Attributes a = attributes.apply(message);
+
+      counts.put(a, counts.computeIfAbsent(a, k -> 0L) + increment.applyAsLong(message));
+
+      if (!created.contains(a)) {
+        created.add(a);
+        counters.add(
+            meter
+                .counterBuilder(name)
+                .buildWithCallback(
+                    measurement -> {
+                      measurement.record(counts.get(a), a);
+
+                      if (reset) {
+                        counts.put(a, 0L);
+                      }
+                    }));
+      }
+    };
+  }
+
   public static Optional<OtelLogHandler> otelLogHandler(
       final String namespace,
       final String name,
@@ -196,10 +250,10 @@ public class OtelUtil {
    * Creates observable <code>Long</code> counters that are reset after each fetch.
    *
    * @param meter the meter from which the counters are created.
-   * @param name the counter name.
+   * @param name the observableCounter name.
    * @param attributes the function that generates the attributes for each measurement based on the
    *     counted data.
-   * @param increment the amount to be added to the counter for an incoming element.
+   * @param increment the amount to be added to the observableCounter for an incoming element.
    * @param counters a set where the generated counters are put. At some point the caller should
    *     close all the counters.
    * @return The function that captures the counted data.
@@ -211,25 +265,6 @@ public class OtelUtil {
       final Function<T, Attributes> attributes,
       final ToLongFunction<T> increment,
       final Set<AutoCloseable> counters) {
-    final Map<Attributes, Long> counts = new ConcurrentHashMap<>();
-    final Set<Attributes> created = new HashSet<>();
-
-    return message -> {
-      final Attributes a = attributes.apply(message);
-
-      counts.put(a, counts.computeIfAbsent(a, k -> 0L) + increment.applyAsLong(message));
-
-      if (!created.contains(a)) {
-        created.add(a);
-        counters.add(
-            meter
-                .counterBuilder(name)
-                .buildWithCallback(
-                    measurement -> {
-                      measurement.record(counts.get(a), a);
-                      counts.put(a, 0L);
-                    }));
-      }
-    };
+    return observableCounter(meter, name, attributes, increment, counters, true);
   }
 }

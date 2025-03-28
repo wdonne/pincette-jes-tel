@@ -64,11 +64,7 @@ public class HttpMetrics {
 
   private static void recordValue(
       final ObservableLongMeasurement measurement, final Map<Attributes, Long> counters) {
-    counters.forEach(
-        (k, v) -> {
-          measurement.record(v, k);
-          counters.put(k, 0L);
-        });
+    counters.forEach((k, v) -> measurement.record(v, k));
   }
 
   /**
@@ -91,17 +87,20 @@ public class HttpMetrics {
     final Map<Attributes, AverageCounter> durationMillis = new ConcurrentHashMap<>();
     final AutoCloseable durationMillisCounter =
         meter
-            .counterBuilder(HTTP_SERVER_AVERAGE_DURATION_MILLIS)
+            .gaugeBuilder(HTTP_SERVER_AVERAGE_DURATION_MILLIS)
+            .ofLongs()
             .buildWithCallback(measurement -> recordAverage(measurement, durationMillis));
     final Map<Attributes, AverageCounter> requestBytes = new ConcurrentHashMap<>();
     final AutoCloseable requestBytesCounter =
         meter
-            .counterBuilder(HTTP_SERVER_AVERAGE_REQUEST_BYTES)
+            .gaugeBuilder(HTTP_SERVER_AVERAGE_REQUEST_BYTES)
+            .ofLongs()
             .buildWithCallback(measurement -> recordAverage(measurement, requestBytes));
     final Map<Attributes, AverageCounter> responseBytes = new ConcurrentHashMap<>();
     final AutoCloseable responseBytesCounter =
         meter
-            .counterBuilder(HTTP_SERVER_AVERAGE_RESPONSE_BYTES)
+            .gaugeBuilder(HTTP_SERVER_AVERAGE_RESPONSE_BYTES)
+            .ofLongs()
             .buildWithCallback(measurement -> recordAverage(measurement, responseBytes));
     final Map<Attributes, Long> requests = new ConcurrentHashMap<>();
     final AutoCloseable requestsCounter =
