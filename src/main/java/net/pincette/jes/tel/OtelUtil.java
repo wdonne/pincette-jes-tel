@@ -1,5 +1,6 @@
 package net.pincette.jes.tel;
 
+import static io.opentelemetry.api.common.Attributes.builder;
 import static java.lang.System.getProperty;
 import static java.util.Optional.ofNullable;
 import static net.pincette.config.Util.configValue;
@@ -96,6 +97,10 @@ public class OtelUtil {
                 + getProperty("java.vm.version"))
         .put(PROCESS_RUNTIME_NAME, getProperty("java.runtime.name"))
         .put(PROCESS_RUNTIME_VERSION, getProperty("java.runtime.version"));
+  }
+
+  public static Attributes attributes(final Map<String, String> labels) {
+    return addLabels(builder().build(), labels);
   }
 
   /**
