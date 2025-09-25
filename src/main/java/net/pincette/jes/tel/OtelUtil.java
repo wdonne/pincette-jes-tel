@@ -272,4 +272,22 @@ public class OtelUtil {
       final Set<AutoCloseable> counters) {
     return observableCounter(meter, name, attributes, increment, counters, true);
   }
+
+  /**
+   * Says if a trace sample should be emitted or not. This is done based on the hash of the trace
+   * ID.
+   *
+   * @param traceId the trace ID that is hashed.
+   * @param percentage the percentage of all the samples that should be retained. It should be a
+   *     number between 1 and 100.
+   * @return Whether the sample should be emitted.
+   * @since 1.0.5
+   */
+  public static boolean retainTraceSample(final String traceId, final int percentage) {
+    if (percentage < 1 || percentage > 100) {
+      throw new IllegalArgumentException("The percentage should be a value between 1 and 100");
+    }
+
+    return traceId.hashCode() % 10 <= (percentage - 1) / 10;
+  }
 }
