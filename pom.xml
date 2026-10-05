@@ -10,7 +10,7 @@
   <version>1.0.14</version>
   <name>pincette-jes-tel</name>
   <description>OpenTelemetry utilities</description>
-  <url>https://github.com/json-event-sourcing/pincette-jes-tel</url>
+  <url>https://github.com/wdonne/pincette-jes-tel</url>
 
   <organization>
     <name>Pincette</name>
@@ -18,9 +18,9 @@
   </organization>
 
   <scm>
-    <url>https://github.com/json-event-sourcing/pincette-jes-tel</url>
-    <connection>scm:git@github.com:json-event-sourcing/pincette-jes-tel.git</connection>
-    <developerConnection>scm:git@github.com:json-event-sourcing/pincette-jes-tel.git
+    <url>https://github.com/wdonne/pincette-jes-tel</url>
+    <connection>scm:git@github.com:wdonne/pincette-jes-tel.git</connection>
+    <developerConnection>scm:git@github.com:wdonne/pincette-jes-tel.git
     </developerConnection>
   </scm>
 
