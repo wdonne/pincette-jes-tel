@@ -7,7 +7,7 @@
   <groupId>net.pincette</groupId>
   <artifactId>pincette-jes-tel</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.15</version>
+  <version>1.0.16</version>
   <name>pincette-jes-tel</name>
   <description>OpenTelemetry utilities</description>
   <url>https://github.com/wdonne/pincette-jes-tel</url>
@@ -54,7 +54,7 @@
       <dependency>
         <groupId>io.opentelemetry</groupId>
         <artifactId>opentelemetry-bom</artifactId>
-        <version>1.67.0</version>
+        <version>1.68.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -100,7 +100,7 @@
     <dependency>
       <groupId>net.pincette</groupId>
       <artifactId>pincette-netty-http</artifactId>
-      <version>3.2.29</version>
+      <version>3.2.30</version>
     </dependency>
     <dependency>
       <groupId>javax.json</groupId>
